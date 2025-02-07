@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import TaskViewSet, SubtaskViewSet, ContactViewSet, SummaryView
+from .views import TaskViewSet, SubtaskViewSet, ContactViewSet, SummaryView, BoardView
 
 # Da ich die EndPunkte brauche, benutze ich DefaultRouter.
 # DefaultRouter() erzeugt automatisch die API-Endpoints für ModelViewSet.
@@ -20,5 +20,5 @@ router.register(r'subtasks', SubtaskViewSet)
 urlpatterns = [
     path('', include(router.urls)),  # Alle Endpunkte unter `/api/` , Diese Zeile macht, dass die API-Root (`/api/`) ViewSets anzeigt.
     path('summary/', SummaryView.as_view(), name="summary"),  # summary/ ist erreichbar unter /api/summary/, aber es taucht nicht in /api/ auf.(manuell).
- 
+    path('board/', BoardView.as_view(), name="board"),
 ]

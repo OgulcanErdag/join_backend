@@ -10,6 +10,7 @@ class ContactSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     contacts = contacts = ContactSerializer(many=True, read_only=True)
     contact_ids = serializers.PrimaryKeyRelatedField(many=True, queryset=Contact.objects.all(), write_only=True) # Sorgt dafür, dass Django IDs akzeptiert, statt komplette JSON-Objekte zu erwarten.
+    icon = serializers.CharField(source="get_icon", read_only=True)
     
     id = serializers.ReadOnlyField()
     board_category = serializers.CharField(required=False)
@@ -38,7 +39,9 @@ class TaskSerializer(serializers.ModelSerializer):
         if contact_ids is not None:
             instance.contacts.set(contact_ids)
         return instance
-
+    
+    def get_icon(self, obj):
+        return obj.icon if obj.icon else "/static/default.svg" 
 class SubtaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subtask

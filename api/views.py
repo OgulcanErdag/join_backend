@@ -4,7 +4,8 @@ from rest_framework import status, viewsets
 from rest_framework.response import Response
 from .models import Task, Subtask, Contact
 from api.serializers import TaskSerializer, SubtaskSerializer, ContactSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+import json
 # Create your views here.
 
 # ModelViewSet gibt automatisch = 'GET', 'POST', 'PUT', 'DELETE'.
@@ -42,6 +43,12 @@ class TaskViewSet(viewsets.ModelViewSet):
             task.contacts.set(contact_ids)  
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def update(self, request, *args, **kwargs):
+        task = self.get_object()
+        print("🔥 PUT Request erhalten:", json.loads(request.body)) 
+        print(f"🔄 Update Request für Task {task.id}: {request.data}") # Debugging
+        return super().update(request, *args, **kwargs)
 
 class SubtaskViewSet(viewsets.ModelViewSet):
     queryset = Subtask.objects.all()
@@ -50,7 +57,7 @@ class SubtaskViewSet(viewsets.ModelViewSet):
 class ContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     # def get_queryset(self):
     #     return Contact.objects.filter(user=self.request.user) 
@@ -71,3 +78,8 @@ class SummaryView(APIView):
             "completed-percentage": round((completed_tasks / total_tasks * 100), 2) if total_tasks > 0 else 0,
         }
         return Response(task_counts)
+    
+class BoardView(APIView):
+    def get(self, request): 
+        tasks = Task.objects.all().values()
+        return Response({"board": list(tasks)})

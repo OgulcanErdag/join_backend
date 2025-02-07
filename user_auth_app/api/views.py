@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from rest_framework import status
 
 class UserProfileList(generics.ListCreateAPIView):
     queryset = UserProfile.objects.all()
@@ -28,12 +29,11 @@ class CustomLoginView(APIView):
         email = request.data.get("email")  # Nutzer gibt E-Mail ein
         password = request.data.get("password")
 
-        try:
-            user = User.objects.get(email=email)  # User anhand der E-Mail suchen
-        except User.DoesNotExist:
+        user = User.objects.filter(email=email).first()
+        if not user:
             return Response({"error": "User not found"}, status=400)
 
-        user = authenticate(username=user.username, password=password)  # Mit Username authentifizieren
+        user = authenticate(username=user.username, password=password) # Mit Username authentifizieren
 
         if user:
             token, created = Token.objects.get_or_create(user=user)
@@ -50,19 +50,19 @@ class RegistrationView(APIView):
         if serializer.is_valid():
             saved_account = serializer.save()
             token, created = Token.objects.get_or_create(user=saved_account)
-            data = {
+
+            return Response({
                 'token': token.key,
                 'username': saved_account.username,
-                'email': saved_account.email                
-            }
-        else:
-            data=serializer.errors
-        return Response(data)     
+                'email': saved_account.email
+            }, status=status.HTTP_201_CREATED)  # 201 = erfolgreich erstellt
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         request.auth.delete()  # Löscht das Token
-        return Response({'message': 'Logged out successfully'})   
+        return Response({'message': 'Logged out successfully'})     
      

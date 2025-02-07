@@ -32,7 +32,7 @@ class Task(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='to-do')
     task_category = models.CharField(max_length=20, blank=True, null=True, choices=TASK_CATEGORY_CHOICES)
     board_category = models.CharField(max_length=20, choices=STATUS_CHOICES, default='to-do')
-
+    icon = models.CharField(max_length=255, blank=True, null=True, default="/static/default.svg")
     contacts = models.ManyToManyField("Contact", related_name="tasks")
 
     def __str__(self):
@@ -52,6 +52,12 @@ class Contact(models.Model):
     email = models.EmailField(unique=True)      # EmailField(unique=True), weil jeder Kontakt eine eindeutige E-Mail haben sollte.
     phone = models.CharField(max_length=20)     # Telefonnummer, als CharField(max_length=20)
     color = models.CharField(max_length=7, default='#000000')  # Zufällig generierte Farbe für UI-Darstellung.
+
+    def __str__(self):
+        return self.name
+    
+class Board(models.Model):
+    name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name
