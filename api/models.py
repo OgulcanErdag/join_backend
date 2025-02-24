@@ -1,11 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
-# In Django möchten wir sicherstellen, dass eine Aufgabe nur einen dieser Werte haben kann.
-# Dafür nutzen wir choices, damit keine falschen Werte gespeichert werden.
-# Ohne choices könnten falsche Werte in die Datenbank gelangen.
-
 class Task(models.Model):
     STATUS_CHOICES = [
         ('to-do', 'To Do'),
@@ -38,20 +32,20 @@ class Task(models.Model):
     def __str__(self):
         return self.title
     
-class Subtask(models.Model):  # task = models.ForeignKey("Task") → Jede Subtask gehört zu einer Task , related_name="subtasks" → So können wir von Task aus auf alle Subtasks zugreifen.
-    task = models.ForeignKey("Task", on_delete=models.CASCADE, related_name="subtasks")  # Beziehung zur Haupt-Task
+class Subtask(models.Model): 
+    task = models.ForeignKey("Task", on_delete=models.CASCADE, related_name="subtasks")  
     title = models.CharField(max_length=255)
-    completed = models.BooleanField(default=False)  # Standardwert: nicht erledigt
+    completed = models.BooleanField(default=False)  
 
     def __str__(self):
-        return f"{self.title} ({'Done' if self.completed else 'Pending'})"
+        return self.title 
 
 
 class Contact(models.Model):
-    name = models.CharField(max_length=255)     # Kontaktname, max. 255 Zeichen.
-    email = models.EmailField(unique=True)      # EmailField(unique=True), weil jeder Kontakt eine eindeutige E-Mail haben sollte.
-    phone = models.CharField(max_length=20)     # Telefonnummer, als CharField(max_length=20)
-    color = models.CharField(max_length=7, default='#000000')  # Zufällig generierte Farbe für UI-Darstellung.
+    name = models.CharField(max_length=255)    
+    email = models.EmailField(unique=True)    
+    phone = models.CharField(max_length=20)     
+    color = models.CharField(max_length=7, default='#000000') 
 
     def __str__(self):
         return self.name

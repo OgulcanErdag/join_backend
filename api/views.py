@@ -1,54 +1,53 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework import status, viewsets
 from rest_framework.response import Response
-from .models import Task, Subtask, Contact
-from api.serializers import TaskSerializer, SubtaskSerializer, ContactSerializer
+from api.models import Task, Subtask, Contact
+from .serializers import TaskSerializer, SubtaskSerializer, ContactSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 import json
-# Create your views here.
+import traceback
 
-# ModelViewSet gibt automatisch = 'GET', 'POST', 'PUT', 'DELETE'.
-# GET /tasks/ → Alle Tasks abrufen.
-# POST /tasks/ → Neuen Task erstellen.
-# GET /tasks/{id}/ → Einen bestimmten Task abrufen.
-# PUT /tasks/{id}/ → Einen Task aktualisieren.
-# DELETE /tasks/{id}/ → Einen Task löschen.
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from .models import Task
+from .serializers import TaskSerializer
 
-class TaskViewSet(viewsets.ModelViewSet):
-    queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+
+class TaskViewSet(ModelViewSet):
+    queryset, serializer_class, permission_classes, http_method_names = Task.objects.all(), TaskSerializer, [IsAuthenticated], ["get", "post", "put", "patch", "delete"]
 
     def get_queryset(self):
-        category = self.request.query_params.get('board_category')
-        if category:
-            return self.queryset.filter(board_category=category)
-        return self.queryset
+        board_category = self.request.query_params.get("board_category", None)
+        if board_category:
+            return Task.objects.filter(board_category=board_category)
+        return Task.objects.all() 
+
+    def perform_create(self, serializer):
+        serializer.save().contacts.set(self._get_contact_ids())
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        contact_ids = request.data.get("contact_ids", None)
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def create(self, request, *args, **kwargs):
-        contact_ids = request.data.pop('contact_ids', [])
-        serializer = self.get_serializer(data=request.data)
+        print(f"🔥 Backend: Eingehende contact_ids = {contact_ids}")  # Debugging
 
-        if serializer.is_valid():
-            task = serializer.save()
-            task.contacts.set(contact_ids)  
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def update(self, request, *args, **kwargs):
-        task = self.get_object()
-        print("🔥 PUT Request erhalten:", json.loads(request.body)) 
-        print(f"🔄 Update Request für Task {task.id}: {request.data}") # Debugging
-        return super().update(request, *args, **kwargs)
+        if contact_ids is not None:
+            instance.contacts.add(*contact_ids)  
+            print(f"✅ Kontakte nach Update: {list(instance.contacts.values_list('id', flat=True))}")  
+
+        return super().partial_update(request, *args, **kwargs)
+
+
+
+
+
+    def _get_contact_ids(self):
+        ids = self.request.data.get("contact_ids", [])
+        print(f"🔥 contact_ids aus Request: {ids}")  # Debug-Print
+        return list(ids) if isinstance(ids, (list, tuple, set)) else [int(i) for i in ids if str(i).isdigit()]
 
 class SubtaskViewSet(viewsets.ModelViewSet):
     queryset = Subtask.objects.all()
@@ -58,9 +57,6 @@ class ContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
     permission_classes = [AllowAny]
-
-    # def get_queryset(self):
-    #     return Contact.objects.filter(user=self.request.user) 
 
 class SummaryView(APIView):
     def get(self, request):
@@ -80,6 +76,7 @@ class SummaryView(APIView):
         return Response(task_counts)
     
 class BoardView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request): 
         tasks = Task.objects.all().values()
         return Response({"board": list(tasks)})

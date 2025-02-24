@@ -3,3 +3,21 @@ echo "__pycache__/" >> .gitignore
 echo "db.sqlite3" >> .gitignore
 echo ".vscode/" >> .gitignore
 echo "*.pyc" >> .gitignore
+
+env/
+__pycache__/
+db.sqlite3
+.vscode/
+*.pyc
+*.pyo
+*.log
+*.db
+*.sqlite3
+.DS_Store
+*.swp
+*.swo
+.idea/
+*.bak
+*.tmp
+media/
+static/
