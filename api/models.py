@@ -10,7 +10,7 @@ class Task(models.Model):
 
     PRIORITY_CHOICES = [
         ('low', 'Low'),
-        ('medium', 'Medium'),
+        ('medium', 'Medium'),   
         ('urgent', 'Urgent'),
     ]
 
