@@ -1,23 +1,28 @@
-echo "env/" >> .gitignore
-echo "__pycache__/" >> .gitignore
-echo "db.sqlite3" >> .gitignore
-echo ".vscode/" >> .gitignore
-echo "*.pyc" >> .gitignore
-
+# Virtuelle Umgebung ignorieren
 env/
+venv/
+
+# Bytecode-Dateien ignorieren
 __pycache__/
-db.sqlite3
-.vscode/
 *.pyc
 *.pyo
-*.log
+
+# Datenbanken und Logs ignorieren
+db.sqlite3
 *.db
 *.sqlite3
-.DS_Store
+*.log
+
+# VS Code und PyCharm Projektdateien ignorieren
+.vscode/
+.idea/
+
+# Cache- und temporäre Dateien ignorieren
 *.swp
 *.swo
-.idea/
 *.bak
 *.tmp
+
+# Medien- und Statische Dateien ignorieren
 media/
-static/
+staticfiles/

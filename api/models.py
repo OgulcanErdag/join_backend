@@ -30,8 +30,7 @@ class Task(models.Model):
     contacts = models.ManyToManyField("Contact", related_name="tasks")
 
     def __str__(self):
-        return self.title
-    
+        return self.title   
 class Subtask(models.Model): 
     task = models.ForeignKey("Task", on_delete=models.CASCADE, related_name="subtasks")  
     title = models.CharField(max_length=255)
@@ -39,8 +38,6 @@ class Subtask(models.Model):
 
     def __str__(self):
         return self.title 
-
-
 class Contact(models.Model):
     name = models.CharField(max_length=255)    
     email = models.EmailField(unique=True)    
@@ -48,8 +45,7 @@ class Contact(models.Model):
     color = models.CharField(max_length=7, default='#000000') 
 
     def __str__(self):
-        return self.name
-    
+        return self.name   
 class Board(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
