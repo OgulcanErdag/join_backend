@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.authentication import TokenAuthentication
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from api.models import Task, Subtask, Contact
@@ -11,10 +12,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .models import Task
 from .serializers import TaskSerializer
+from .permissions import IsAuthenticatedOrGuest
 
 
 class TaskViewSet(ModelViewSet):
-    queryset, serializer_class, permission_classes, http_method_names = Task.objects.all(), TaskSerializer, [AllowAny], ["get", "post", "put", "patch", "delete"]
+    queryset, serializer_class, permission_classes, authentication_classes, http_method_names = Task.objects.all(), TaskSerializer, [IsAuthenticatedOrGuest],[TokenAuthentication], ["get", "post", "put", "patch", "delete"]
 
     def get_queryset(self):
         board_category = self.request.query_params.get("board_category", None)

@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "ersetze-das-in-der-produktion!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG", "False").strip().lower() in ("true", "1", "t", "yes")
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'ogulcan-erdag.developerakademie.net']
 AUTH_USER_MODEL = 'user_auth_app.CustomUser'
@@ -42,11 +42,13 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'api',
-    'user_auth_app'     
+    'user_auth_app',
+    'whitenoise.runserver_nostatic'    
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -59,12 +61,14 @@ MIDDLEWARE = [
 CSRF_TRUSTED_ORIGINS = [
   'http://127.0.0.1:5500',
   'http://localhost:5500',
+  'http://127.0.0.1:8000',
   'https://ogulcan-erdag.developerakademie.net',
 ]
 
 CORS_ALLOWED_ORIGINS = [
   'http://127.0.0.1:5500',
   'http://localhost:5500',
+  'http://127.0.0.1:8000',
   'https://ogulcan-erdag.developerakademie.net',
 ]
 
@@ -132,8 +136,29 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # Wo gesammelte Dateien landen
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"  #  Whitenoise Speichersystem
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'errors.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
