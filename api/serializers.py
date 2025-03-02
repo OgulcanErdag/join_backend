@@ -20,8 +20,9 @@ class TaskSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Contact.objects.all(),
         source="contacts",  
-        write_only=True 
+        write_only=False 
     )
+    subtasks = SubtaskSerializer(many=True, read_only=True, default=list)
     class Meta:
         model = Task
         fields = ['id', 'title', 'description', 'due_date', 'priority', 'board_category', 'task_category', 'subtasks', 'contacts', 'contact_ids']
